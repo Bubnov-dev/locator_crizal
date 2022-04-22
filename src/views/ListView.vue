@@ -5,12 +5,7 @@ import { RouterLink } from "vue-router";
   <div class="search-bar">
     <div class="search">
       <div class="input-wrapper">
-        <input
-          id="suggest"
-          v-model="search"
-          type="text"
-          @change="searchInput"
-        />
+        <input id="suggest" v-model="search" type="text" />
         <div class="geo-ip" @click="searchMe">
           <svg
             width="30px"
@@ -42,7 +37,7 @@ import { RouterLink } from "vue-router";
       <div class="btn search-btn btn-primary" @click="searchInput">Найти</div>
     </div>
 
-    <div class="filter">Фильтрация</div>
+    <!-- <div class="filter">Фильтрация</div> -->
   </div>
   <div class="template-list-wrap">
     <div class="list-items">
@@ -80,7 +75,7 @@ import { RouterLink } from "vue-router";
       </div>
     </div>
     <div class="map" id="map" style="width: 1000px; height: 700px">
-      <yandex-map v-model:coords="coords" :zoom="13">
+      <yandex-map v-model:coords="coords" :zoom="zoom">
         <ymap-marker
           v-for="(item, idx) in items"
           :key="item"
@@ -103,17 +98,22 @@ export default {
 
   data: function () {
     return {
-      coords: localStorage.getItem("coords").split(",") ?? [50, 50],
+      coords: [],
       items: [],
       suggestView: {},
       search: "",
+      zoom: 20,
     };
   },
   async mounted() {
+    this.coords =
+      localStorage.getItem("coords") != null
+        ? localStorage.getItem("coords").split(",")
+        : [59.9, 30.3];
     // console.log(yandexMap);
     const settings = {
-      apiKey: "bb72a44c-30ae-4a0b-8fc6-5681233e185b",
-      apikey: "bb72a44c-30ae-4a0b-8fc6-5681233e185b",
+      apiKey: "69eaa562-7533-4f5c-b62c-e9cd27fdce29",
+
       lang: "ru_RU",
       coordorder: "latlong",
       enterprise: true,
@@ -222,32 +222,31 @@ export default {
       // let myGeocoder = window.ymaps.geocode(this.search);
       console.log("searchInput");
       console.log(
-        "https://geocode-maps.yandex.ru/1.x/?apikey=bb72a44c-30ae-4a0b-8fc6-5681233e185b&format=json&geocode=" +
-          this.search
+        // "https://geocode-maps.yandex.ru/1.x/?apikey=bb72a44c-30ae-4a0b-8fc6-5681233e185b&format=json&geocode=" +
+        this.search
       );
       axios({
         method: "get",
         url:
-          "https://geocode-maps.yandex.ru/1.x/?apikey=bb72a44c-30ae-4a0b-8fc6-5681233e185b&format=json&geocode=" +
+          "https://geocode-maps.yandex.ru/1.x/?apikey=69eaa562-7533-4f5c-b62c-e9cd27fdce29&format=json&geocode=" +
           this.search,
       }).then(
         (res) => {
-          console.log("geo res");
+          console.log("geo res now");
           console.log(this.coords);
+          console.log("geo res we have");
+
           console.log(res);
           try {
-            console.log(
-              res.data.response.GeoObjectCollection.featureMember[0].GeoObject.Point.pos.split(
-                " "
-              )
-            );
-            this.coords =
+            let tmp_coords =
               res.data.response.GeoObjectCollection.featureMember[0].GeoObject.Point.pos.split(
                 " "
               );
-            this.coords.reverse();
+            tmp_coords.reverse();
+            this.coords = tmp_coords;
+            // this.coords.reverse();
             localStorage.setItem("coords", this.coords);
-
+            console.log("and now");
             console.log(this.coords);
             this.searchF();
           } catch (error) {
